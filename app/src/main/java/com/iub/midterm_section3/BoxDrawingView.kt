@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
+import android.os.Bundle
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -25,7 +27,6 @@ class BoxDrawingView(
     private val backgroundPaint = Paint().apply {
         color = 0xfff8efe0.toInt()
     }
-
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val current = PointF(event.x, event.y)
@@ -75,4 +76,25 @@ class BoxDrawingView(
         }
     }
 
+    override fun onSaveInstanceState(): Parcelable {
+        val superState = super.onSaveInstanceState()
+        val savedState = Bundle().apply {
+            putParcelable("superState", superState)
+            putParcelableArrayList("boxes", ArrayList(boxes))
+        }
+        return savedState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        var superState = state
+        if (state is Bundle) {
+            val boxesState = state.getParcelableArrayList<Box>("boxes")
+            boxesState?.let {
+                boxes.clear()
+                boxes.addAll(it)
+            }
+            superState = state.getParcelable("superState")
+        }
+        super.onRestoreInstanceState(superState)
+    }
 }
